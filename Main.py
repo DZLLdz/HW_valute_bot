@@ -28,15 +28,22 @@ def value_message(message: telebot.types.Message):
 
 @bot.message_handler(content_types=["text", ])
 def convert_user_value(message: telebot.types.Message):
-    values = message.text.split(" ")
-    if len(values) != 3:
-        raise ConvertionExeptions("Invalid parameters")
-    if len(Valutes.base_value_dict) < 1:
-        Valutes.update_valutes()
-    quote, base, amount = values
-    total_amount = ValuteConverter.convert(quote, base, amount)
-    text = (f"Стоимость {amount} {quote} эквивалентно {total_amount} {base}. \n\
+    try:
+        values = message.text.split(" ")
+        if len(values) != 3:
+            bot.reply_to(message, "Invalid parametrs")
+            raise ConvertionExeptions("Invalid parameters")
+        if len(Valutes.base_value_dict) < 1:
+            Valutes.update_valutes()
+        quote, base, amount = values
+        total_amount = ValuteConverter.convert(quote, base, amount)
+    except ConvertionExeptions as e:
+        bot.reply_to(message, f'Ошибка пользователя!\n {e}')
+    except Exception as e:
+        bot.reply_to(message, f'Не могу обработать команду!\n {e}')
+    else:
+        text = (f"Стоимость {amount} {quote} эквивалентно {total_amount} {base}. \n\
 информация обновлена от: {Valutes.update_time}")
-    bot.reply_to(message, f"Информация с сайта cbr.ru:\n{text}")
+        bot.reply_to(message, f"Информация с сайта cbr.ru:\n{text}")
 
 bot.polling()
